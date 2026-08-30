@@ -35,3 +35,12 @@ body {
 .form-group {
     margin-bottom: 1rem;
 }
+
+input:invalid {
+    border-color: #990000;
+    background-color: #ffdddd;
+}
+
+input:focus:invalid {
+    outline: none;
+}
