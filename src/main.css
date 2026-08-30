@@ -55,6 +55,19 @@ input:focus:invalid {
     outline: none;
 }
 
-input span {
+.form-group .error {
     width: 100%;
+    font-size: 80%;
+    color: white;
+    background-color: #990000;
+    border-radius: 0 0 5px 5px;
+}
+
+.error.active {
+    padding: .3rem;
+}
+
+input {
+    padding-left: .3rem;
+    padding-bottom: .2rem;
 }
