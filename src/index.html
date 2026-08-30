@@ -1,11 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <H1>TEMPLATE</H1>
-</body>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Document</title>
+	</head>
+	<body>
+		<div class="form-container">
+			<h2>Create an Account</h2>
+
+			<form novalidate action="#" method="POST" id="registrationForm">
+				<div class="form-group">
+					<label for="email">Email Address</label>
+					<input
+						type="email"
+						id="email"
+						name="email"
+						placeholder="you@example.com"
+						required
+					>
+				</div>
+
+				<div class="form-group">
+					<label for="country">Country</label>
+					<select id="country" name="country" required>
+						<option value="" disabled selected>Select your country</option>
+						<option value="US">United States</option>
+						<option value="UK">United Kingdom</option>
+						<option value="CA">Canada</option>
+						<option value="AU">Australia</option>
+						<option value="ZA">South Africa</option>
+					</select>
+				</div>
+
+				<div class="form-group">
+					<label for="postalCode">Postal Code</label>
+					<input
+						type="text"
+						id="postalCode"
+						name="postalCode"
+						placeholder="Enter postal code"
+						required
+					>
+				</div>
+
+				<div class="form-group">
+					<label for="password">Password</label>
+					<input
+						type="password"
+						id="password"
+						name="password"
+						placeholder="Create a password"
+						required
+					>
+				</div>
+
+				<div class="form-group">
+					<label for="confirmPassword">Confirm Password</label>
+					<input
+						type="password"
+						id="confirmPassword"
+						name="confirmPassword"
+						placeholder="Confirm your password"
+						required
+					>
+				</div>
+
+				<button type="submit">Sign Up</button>
+			</form>
+		</div>
+	</body>
 </html>
