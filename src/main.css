@@ -34,6 +34,16 @@ body {
 
 .form-group {
     margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+input,
+select {
+    width: 100%;
+    border: 1px solid #333333;
+    font-family: inherit;
+    font-size: 90%;
 }
 
 input:invalid {
@@ -43,4 +53,8 @@ input:invalid {
 
 input:focus:invalid {
     outline: none;
+}
+
+input span {
+    width: 100%;
 }
