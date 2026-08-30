@@ -26,6 +26,7 @@ inputs.forEach((input) => {
 
             const s = errorName.charAt(0).toUpperCase() + errorName.slice(1);
             const functionName = `show${s}Error`;
+            log(functionName);
             actions[functionName](input, error);
         }
     });
@@ -36,8 +37,9 @@ const errorSpans = document.querySelectorAll(".form-group input ~ .error");
 log(errorSpans);
 
 const form = document.querySelector("form");
-
-// Error messages
+const countryErrorSpan = document.querySelector(
+    `.form-group.country .error`,
+);
 
 // Submit button
 form.addEventListener("submit", (event) => {
@@ -56,16 +58,20 @@ form.addEventListener("submit", (event) => {
         const emailError = document.querySelector(".form-group.email .error");
 
         showEmailError(email, emailError);
-        // prevent form submission
     }
 
     if (!country.validity.valid) {
         // display an appropriate error message
-        const CountryErrorSpan = document.querySelector(
-            `.form-group.country .error`,
+
+        showDropDownError(country, countryErrorSpan);
+    }
+
+    if (!postalCode.validity.valid) {
+        // display an appropriate error message
+        const postalCodeErrorSpan = document.querySelector(
+            `.form-group.postalCode .error`,
         );
-        showDropDownError(country, CountryErrorSpan);
-        // prevent form submission
+        showPostalCodeError(postalCode, postalCodeErrorSpan);
     }
 });
 
@@ -96,6 +102,26 @@ function showDropDownError(input, errorMessageSpan) {
     errorMessageSpan.className = "error active";
 }
 
+function showPostalCodeError(input, errorMessageSpan) {
+    if (input.validity.valueMissing) {
+        errorMessageSpan.textContent = "You need to enter a postal code.";
+    } else if (input.validity.tooLong) {
+        // If the value is too long,
+        errorMessageSpan.textContent = `Postal code should be 
+            less than ${input.minLength} characters; you entered ${input.value.length}.`;
+    }
+
+    errorMessageSpan.className = "error active";
+}
+
+country.addEventListener('change', () => {
+    if (country.validity.valid) {
+        countryErrorSpan.textContent = ""; // Remove the message content
+        countryErrorSpan.className = "error"; // Removes the 
+    }
+})
+
 const actions = {
     showEmailError: showEmailError,
+    showPostalCodeError: showPostalCodeError
 };
