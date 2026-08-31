@@ -1,7 +1,6 @@
 import "../src/main.css";
 
 const log = console.log;
-// Inputs
 const email = document.querySelector("#email");
 const country = document.querySelector("#country");
 const postalCode = document.querySelector("#postalCode");
@@ -19,15 +18,19 @@ inputs.forEach((input) => {
             input.required = false;
         }
 
+        log(input.id)
         if (input.validity.valid) {
             error.textContent = ""; // Remove the message content
             error.className = "error"; // Removes the 
         } else {
-
             const s = errorName.charAt(0).toUpperCase() + errorName.slice(1);
             const functionName = `show${s}Error`;
             log(functionName);
             actions[functionName](input, error);
+        }
+
+        if (input.id === 'confirmPassword' || input.id === 'password') {
+            passwordConfirmation();
         }
     });
 });
@@ -73,6 +76,24 @@ form.addEventListener("submit", (event) => {
         );
         showPostalCodeError(postalCode, postalCodeErrorSpan);
     }
+
+    if (!password.validity.valid) {
+        const passwordErrorSpan = document.querySelector(
+            `.form-group.password .error`,
+        );
+
+        showPasswordError(password, passwordErrorSpan)
+    }
+
+    if (!confirmPassword.validity.valid) {
+        const confirmPasswordErrorSpan = document.querySelector(
+            `.form-group.confirmPassword .error`,
+        );
+
+        showConfirmPasswordError(confirmPassword, confirmPasswordErrorSpan)
+    } else {
+        passwordConfirmation(true);
+    }
 });
 
 function showEmailError(input, errorMessageSpan) {
@@ -114,6 +135,51 @@ function showPostalCodeError(input, errorMessageSpan) {
     errorMessageSpan.className = "error active";
 }
 
+function showPasswordError(input, errorMessageSpan) {
+    if (input.validity.valueMissing) {
+        errorMessageSpan.textContent = "You need to enter a password.";
+    } else if (input.validity.tooShort) {
+        // If the value is too long,
+        errorMessageSpan.textContent = `Password should be 
+            more than ${input.minLength} characters; you entered ${input.value.length}.`;
+    }
+
+    errorMessageSpan.className = "error active";
+}
+
+function showConfirmPasswordError(input, errorMessageSpan) {
+    if (input.validity.valueMissing) {
+        errorMessageSpan.textContent = "You need to confirm your password.";
+    }
+
+    errorMessageSpan.className = "error active";
+
+    passwordConfirmation()
+}
+
+function passwordConfirmation(onSubmit = false) {
+    const confirmPasswordErrorSpan = document.querySelector(
+        `.form-group.confirmPassword .error`,
+    );
+
+    log(confirmPassword.value !== "" && password.value !== "")
+    if (onSubmit) {
+        if (confirmPassword.value !== password.value) {
+            confirmPasswordErrorSpan.textContent = "Passwords do not match.";
+            confirmPasswordErrorSpan.className = "error active";
+        }
+    } else if (confirmPassword.value !== "" && password.value !== "") {
+        if (confirmPassword.value !== password.value) {
+            confirmPasswordErrorSpan.textContent = "Passwords do not match.";
+            confirmPasswordErrorSpan.className = "error active";
+        } else {
+            confirmPasswordErrorSpan.className = "error"
+            confirmPasswordErrorSpan.textContent = '';
+        }
+    }
+}
+// confirmPassword.addEventListener('input')
+
 country.addEventListener('change', () => {
     if (country.validity.valid) {
         countryErrorSpan.textContent = ""; // Remove the message content
@@ -123,5 +189,7 @@ country.addEventListener('change', () => {
 
 const actions = {
     showEmailError: showEmailError,
-    showPostalCodeError: showPostalCodeError
+    showPostalCodeError: showPostalCodeError,
+    showPasswordError: showPasswordError,
+    showConfirmPasswordError: showConfirmPasswordError
 };
