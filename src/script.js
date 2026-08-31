@@ -1,6 +1,5 @@
 import "../src/main.css";
 
-const log = console.log;
 // Inputs
 const email = document.querySelector("#email");
 const country = document.querySelector("#country");
@@ -12,87 +11,26 @@ const countryErrorSpan = document.querySelector(`.form-group.country .error`);
 // All text inputs
 const inputs = document.querySelectorAll(".form-group input");
 
-// Attach a live validation listener to every text input.
-inputs.forEach((input) => {
-    // Each input has a matching error span stored under `.form-group.<id> .error`.
-    const errorName = input.id;
-    const error = document.querySelector(`.form-group.${errorName} .error`);
+function passwordConfirmation(onSubmit = false) {
+    const confirmPasswordErrorSpan = document.querySelector(
+        `.form-group.confirmPassword .error`,
+    );
 
-    // Validate as the user types.
-    input.addEventListener("input", () => {
-        // An empty field shouldn't be blocked by `required` while typing.
-        if (input.value.trim().length === 0) {
-            input.required = false;
+    if (onSubmit) {
+        if (confirmPassword.value !== password.value) {
+            confirmPasswordErrorSpan.textContent = "Passwords do not match.";
+            confirmPasswordErrorSpan.className = "error active";
         }
-
-        log(input.id);
-        if (input.validity.valid) {
-            error.textContent = ""; // Remove the message content
-            error.className = "error"; // Removes the `active` class
+    } else if (confirmPassword.value !== "" && password.value !== "") {
+        if (confirmPassword.value !== password.value) {
+            confirmPasswordErrorSpan.textContent = "Passwords do not match.";
+            confirmPasswordErrorSpan.className = "error active";
         } else {
-            // Build the matching handler name, e.g. `showEmailError`, from the id.
-            const s = errorName.charAt(0).toUpperCase() + errorName.slice(1);
-            const functionName = `show${s}Error`;
-            log(functionName);
-            actions[functionName](input, error);
+            confirmPasswordErrorSpan.className = "error";
+            confirmPasswordErrorSpan.textContent = "";
         }
-
-        // Re-check password match whenever either password field changes.
-        if (input.id === "confirmPassword" || input.id === "password") {
-            passwordConfirmation();
-        }
-    });
-});
-
-form.addEventListener("submit", (event) => {
-    // Keep the browser from submitting so we can validate everything ourselves.
-    event.preventDefault();
-
-    // On submit, empty fields should count as invalid (unlike while typing).
-    inputs.forEach((input) => {
-        if (input.value.trim().length === 0) {
-            input.required = true;
-        }
-    });
-
-    // Show the right error for each field that fails validation.
-    if (!email.validity.valid) {
-        log("hello");
-        const emailError = document.querySelector(".form-group.email .error");
-
-        showEmailError(email, emailError);
     }
-
-    if (!country.validity.valid) {
-        showDropDownError(country, countryErrorSpan);
-    }
-
-    if (!postalCode.validity.valid) {
-        const postalCodeErrorSpan = document.querySelector(
-            `.form-group.postalCode .error`,
-        );
-        showPostalCodeError(postalCode, postalCodeErrorSpan);
-    }
-
-    if (!password.validity.valid) {
-        const passwordErrorSpan = document.querySelector(
-            `.form-group.password .error`,
-        );
-
-        showPasswordError(password, passwordErrorSpan);
-    }
-
-    if (!confirmPassword.validity.valid) {
-        const confirmPasswordErrorSpan = document.querySelector(
-            `.form-group.confirmPassword .error`,
-        );
-
-        showConfirmPasswordError(confirmPassword, confirmPasswordErrorSpan);
-    } else {
-        // Valid but might not match — force a final match check.
-        passwordConfirmation(true);
-    }
-});
+}
 
 function showEmailError(input, errorMessageSpan) {
     if (input.validity.valueMissing) {
@@ -152,27 +90,109 @@ function showConfirmPasswordError(input, errorMessageSpan) {
     passwordConfirmation();
 }
 
-function passwordConfirmation(onSubmit = false) {
-    const confirmPasswordErrorSpan = document.querySelector(
-        `.form-group.confirmPassword .error`,
-    );
+// Maps an input id to the function that renders its error message.
+// Used by `validateField` to dispatch to the right handler at runtime.
+const actions = {
+    showEmailError: showEmailError,
+    showPostalCodeError: showPostalCodeError,
+    showPasswordError: showPasswordError,
+    showConfirmPasswordError: showConfirmPasswordError,
+};
 
-    log(confirmPassword.value !== "" && password.value !== "");
-    if (onSubmit) {
-        if (confirmPassword.value !== password.value) {
-            confirmPasswordErrorSpan.textContent = "Passwords do not match.";
-            confirmPasswordErrorSpan.className = "error active";
+// Attach a live validation listener to every text input.
+inputs.forEach((input) => {
+    // Each input has a matching error span stored under `.form-group.<id> .error`.
+    const errorName = input.id;
+    const error = document.querySelector(`.form-group.${errorName} .error`);
+
+    // Validate as the user types.
+    input.addEventListener("input", () => {
+        // An empty field shouldn't be blocked by `required` while typing.
+        if (input.value.trim().length === 0) {
+            input.required = false;
         }
-    } else if (confirmPassword.value !== "" && password.value !== "") {
-        if (confirmPassword.value !== password.value) {
-            confirmPasswordErrorSpan.textContent = "Passwords do not match.";
-            confirmPasswordErrorSpan.className = "error active";
-        } else {
-            confirmPasswordErrorSpan.className = "error";
-            confirmPasswordErrorSpan.textContent = "";
+
+        validateField(input, error, errorName);
+    });
+
+    // Validate the moment the user leaves the field.
+    input.addEventListener("blur", () => {
+        // Leaving a required field empty is an error, so enforce `required` now.
+        if (input.value.trim().length === 0) {
+            input.required = true;
         }
+
+        validateField(input, error, errorName);
+    });
+});
+
+// Validate a single field: clear its error when valid, otherwise show the
+// matching error message. Also re-checks password match for the password fields.
+function validateField(input, error, errorName) {
+    if (input.validity.valid) {
+        error.textContent = ""; // Remove the message content
+        error.className = "error"; // Removes the `active` class
+    } else {
+        // Build the matching handler name, e.g. `showEmailError`, from the id.
+        const s = errorName.charAt(0).toUpperCase() + errorName.slice(1);
+        const functionName = `show${s}Error`;
+        actions[functionName](input, error);
+    }
+
+    // Re-check password match whenever either password field changes.
+    if (input.id === "confirmPassword" || input.id === "password") {
+        passwordConfirmation();
     }
 }
+
+form.addEventListener("submit", (event) => {
+    // Keep the browser from submitting so we can validate everything ourselves.
+    event.preventDefault();
+
+    // On submit, empty fields should count as invalid (unlike while typing).
+    inputs.forEach((input) => {
+        if (input.value.trim().length === 0) {
+            input.required = true;
+        }
+    });
+
+    // Show the right error for each field that fails validation.
+    if (!email.validity.valid) {
+        const emailError = document.querySelector(".form-group.email .error");
+
+        showEmailError(email, emailError);
+    }
+
+    if (!country.validity.valid) {
+        showDropDownError(country, countryErrorSpan);
+    }
+
+    if (!postalCode.validity.valid) {
+        const postalCodeErrorSpan = document.querySelector(
+            `.form-group.postalCode .error`,
+        );
+        showPostalCodeError(postalCode, postalCodeErrorSpan);
+    }
+
+    if (!password.validity.valid) {
+        const passwordErrorSpan = document.querySelector(
+            `.form-group.password .error`,
+        );
+
+        showPasswordError(password, passwordErrorSpan);
+    }
+
+    if (!confirmPassword.validity.valid) {
+        const confirmPasswordErrorSpan = document.querySelector(
+            `.form-group.confirmPassword .error`,
+        );
+
+        showConfirmPasswordError(confirmPassword, confirmPasswordErrorSpan);
+    } else {
+        // Valid but might not match — force a final match check.
+        passwordConfirmation(true);
+    }
+});
 
 country.addEventListener("change", () => {
     if (country.validity.valid) {
@@ -180,10 +200,3 @@ country.addEventListener("change", () => {
         countryErrorSpan.className = "error"; // Removes the
     }
 });
-
-const actions = {
-    showEmailError: showEmailError,
-    showPostalCodeError: showPostalCodeError,
-    showPasswordError: showPasswordError,
-    showConfirmPasswordError: showConfirmPasswordError,
-};
